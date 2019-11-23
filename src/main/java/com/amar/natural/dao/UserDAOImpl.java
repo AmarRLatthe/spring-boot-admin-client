@@ -5,6 +5,7 @@ import javax.persistence.EntityManagerFactory;
 import org.hibernate.Query;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,15 +21,15 @@ public class UserDAOImpl implements UserDAO {
 	@Autowired
 	private EntityManagerFactory entityManagerFactory;
 	
-	@Autowired
-	private SessionFactoryObjectUtil factoryObjectUtil;
+//	@Autowired
+//	private SessionFactoryObjectUtil factoryObjectUtil;
 	
 	Session session = null;
 	@Override
 	public UserDTO getUserByEmail(String email) {
 		String hql = "from UserDTO u where u.emailId=: email";
-		session = factoryObjectUtil.getSessionFactory().openSession();
-		//session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
+		///session = factoryObjectUtil.getSessionFactory().openSession();
+		session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("email", email);
 		UserDTO userDto = (UserDTO) query.list();
@@ -40,10 +41,13 @@ public class UserDAOImpl implements UserDAO {
 		
 		Transaction transaction = null;
 		Integer id = 0;
-		session = factoryObjectUtil.getSessionFactory().openSession();
+		session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
+		//session = factoryObjectUtil.getSessionFactory().openSession();
 		try {
 			transaction = session.beginTransaction();
 			id = (Integer) session.save(userDTO);
+			session.flush();
+			session.clear();
 			transaction.commit();
 		} catch (Exception e) {
 			transaction.rollback();

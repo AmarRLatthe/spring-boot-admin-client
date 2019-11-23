@@ -1,6 +1,9 @@
 package com.amar.natural.dao;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,9 @@ public class RegisterDAOImpl implements RegisterDAO {
 	@Autowired
 	private SessionFactoryObjectUtil factory;
 	
+	@Autowired
+	private EntityManagerFactory entityManagerFactory;
+	
 	@Override
 	public int registerUser(RegisterDTO registerDTO) {
 		logger.info("Inside registerUser of RegisterDAOImpl");
@@ -25,7 +31,8 @@ public class RegisterDAOImpl implements RegisterDAO {
 		Transaction transaction = null;
 		Integer id = 0;
 		try {
-			session = factory.getSessionFactory().openSession();
+			session = entityManagerFactory.unwrap(SessionFactory.class).openSession();
+			//session = factory.getSessionFactory().openSession();
 			id = (Integer) session.save(registerDTO);
 			transaction = session.beginTransaction();
 			logger.info("User registered with id ::: " +id); 
